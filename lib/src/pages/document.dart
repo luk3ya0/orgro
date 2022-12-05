@@ -346,7 +346,7 @@ class _DocumentPageState extends State<DocumentPage> with ViewSettingsState {
       const BoxConstraints(),
       Text.rich(const TextSpan(text: 'M'), style: textStyle),
     );
-    return 72 * mBox.toRect().width;
+    return 83 * mBox.toRect().width;
   }
 
   Widget? _buildFloatingActionButton(
