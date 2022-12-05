@@ -46,7 +46,13 @@ class LocalImage extends StatelessWidget {
         relativePath,
         _futureImage(),
       ),
-      child: _futureImage(scale: MediaQuery.of(context).devicePixelRatio),
+      child: Center(
+        child: Padding(
+            padding:
+                const EdgeInsets.only(top: 10, bottom: 20, left: 10, right: 10),
+            child:
+                _futureImage(scale: MediaQuery.of(context).devicePixelRatio)),
+      ),
     );
   }
 
