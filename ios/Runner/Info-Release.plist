@@ -2,12 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>CFBundleLocalizations</key>
-	<array>
-		<string>en</string>
-		<string>ja</string>
-        <string>uk</string>
-	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDocumentTypes</key>
@@ -47,6 +41,12 @@
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>ja</string>
+		<string>uk</string>
+	</array>
 	<key>CFBundleName</key>
 	<string>$(DISPLAY_NAME)</string>
 	<key>CFBundlePackageType</key>
@@ -89,10 +89,6 @@
 		<dict>
 			<key>UTTypeConformsTo</key>
 			<array>
-                <!-- This should really be 'public.plain-text', but we use
-                     'public.data' here to force the file picker to show the
-                     .org extension; see
-                     https://github.com/amake/orgro/issues/18 -->
 				<string>public.data</string>
 			</array>
 			<key>UTTypeDescription</key>
