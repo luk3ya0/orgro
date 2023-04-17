@@ -59,7 +59,7 @@ SPEC CHECKSUMS:
   file_picker_writable: 67959f5c516feb5121693a14eda63fcbe6cbb6dc
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_charset_detector_ios: 5157d0104855b9deb78e1395515a287197bc2d55
-  flutter_tex_js_ios: f0ddb462f0dc7dc66ebb40aa0dbcb96d87e9afd6
+  flutter_tex_js_ios: babbfcf08c2586a67d7ee713dbb5e8acdff19dd6
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
   path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
   shared_preferences_foundation: 297b3ebca31b34ec92be11acd7fb0ba932c822ca
@@ -67,6 +67,6 @@ SPEC CHECKSUMS:
   UniversalDetector2: 7c9ffd935cf050eeb19edf7e90f6febe3743a1af
   url_launcher_ios: 839c58cdb4279282219f5e248c3321761ff3c4de
 
-PODFILE CHECKSUM: 891a7abf0c4cfa6b4e2264185f67d0fe32b9c8a2
+PODFILE CHECKSUM: c3b91f717cca9b70e41017a055dfd78cdf530727
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.12.0
