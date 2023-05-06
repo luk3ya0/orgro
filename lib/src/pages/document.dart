@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:hybrid_image/hybrid_image.dart';
 import 'package:org_flutter/org_flutter.dart';
 import 'package:orgro/src/actions/actions.dart';
 import 'package:orgro/src/actions/geometry.dart';
@@ -494,6 +497,7 @@ class _DocumentPageState extends State<DocumentPage> with ViewSettingsState {
     if (widget.dataSource.needsToResolveParent) {
       return null;
     }
+
     return LocalImage(
       dataSource: widget.dataSource,
       relativePath: link.body,
