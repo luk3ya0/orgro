@@ -36,7 +36,6 @@ dependencies:
   path_provider: ^2.0.9
   shared_preferences: ^2.0.0
   url_launcher: ^6.0.0
-  hybrid_image: ^1.0.0
   flutter_svg: ^1.0.3
 
 dev_dependencies:

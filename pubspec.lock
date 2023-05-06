@@ -277,14 +277,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.0.2"
-  hybrid_image:
-    dependency: "direct main"
-    description:
-      name: hybrid_image
-      sha256: "27531c514f0c56c1e69a758d4f345fa69e9dd86dd4ee8e4ba1349e45bd882a07"
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.0"
   intl:
     dependency: "direct main"
     description:
