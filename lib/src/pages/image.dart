@@ -76,35 +76,19 @@ class _LocalImageState extends State<LocalImage> {
   }
 
   Widget _futureImage({double scale = 1}) {
-    if (widget.relativePath.endsWith('svg')) {
-      return FutureBuilder<Uint8List?>(
-        future: _bytes,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
+    return FutureBuilder<Uint8List?>(
+      future: _bytes,
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          if (widget.relativePath.endsWith('svg')) {
             final rawSvg = String.fromCharCodes(snapshot.data!);
             return FittedBox(
               fit: BoxFit.scaleDown,
               child: SvgPicture.string(rawSvg),
             );
-          } else if (snapshot.hasError) {
-            return Row(
-              children: [
-                const Icon(Icons.error),
-                const SizedBox(width: 8),
-                Flexible(child: Text(snapshot.error.toString()))
-              ],
-            );
           } else {
-            return const CircularProgressIndicator();
+            return Image.memory(snapshot.data!, scale: scale);
           }
-        },
-      );
-    }
-    return FutureBuilder<Uint8List?>(
-      future: _bytes,
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return Image.memory(snapshot.data!, scale: scale);
         } else if (snapshot.hasError) {
           return Row(
             children: [
