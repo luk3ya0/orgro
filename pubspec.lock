@@ -227,10 +227,9 @@ packages:
   flutter_tex_js_ios:
     dependency: transitive
     description:
-      name: flutter_tex_js_ios
-      sha256: f6a2c7bcc2615d253d5f751a7cfca64203dbf35e4100cab67fe201ac883ef4f8
-      url: "https://pub.dev"
-    source: hosted
+      path: "../flutter_tex_js/flutter_tex_js_ios"
+      relative: true
+    source: path
     version: "2.0.0"
   flutter_tex_js_platform_interface:
     dependency: transitive

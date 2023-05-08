@@ -473,7 +473,7 @@ class _DocumentPageState extends State<DocumentPage> with ViewSettingsState {
     try {
       final fileLink = OrgFileLink.parse(link.location);
       if (fileLink.isRelative) {
-        return _loadLocalImage(fileLink);
+        return Center(child: _loadLocalImage(fileLink));
       }
     } on Exception {
       // Not a file link
