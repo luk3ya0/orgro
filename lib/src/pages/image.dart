@@ -2,10 +2,15 @@ import 'dart:typed_data';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:orgro/src/data_source.dart';
 import 'package:orgro/src/debug.dart';
 import 'package:orgro/src/navigation.dart';
+
+bool _isSvg(String url) {
+  final segments = Uri.parse(url).pathSegments;
+  return segments.isEmpty ? false : segments.last.endsWith('.svg');
+}
 
 class RemoteImage extends StatelessWidget {
   const RemoteImage(this.url, {super.key});
@@ -14,18 +19,30 @@ class RemoteImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onLongPress: () => showInteractive(
-        context,
-        url,
-        Image(image: CachedNetworkImageProvider(url)),
-      ),
-      child: Image(
+      onLongPress: () => showInteractive(context, url, _image(context, url)),
+      child: _scaledImage(context, url),
+    );
+  }
+
+  Widget _image(BuildContext context, String url) {
+    if (_isSvg(url)) {
+      return SvgPicture.network(url);
+    } else {
+      return Image(image: CachedNetworkImageProvider(url));
+    }
+  }
+
+  Widget _scaledImage(BuildContext context, String url) {
+    if (_isSvg(url)) {
+      return SvgPicture.network(url);
+    } else {
+      return Image(
         image: CachedNetworkImageProvider(
           url,
           scale: MediaQuery.of(context).devicePixelRatio,
         ),
-      ),
-    );
+      );
+    }
   }
 }
 
