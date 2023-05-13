@@ -98,11 +98,11 @@ class _LocalImageState extends State<LocalImage> {
       builder: (context, snapshot) {
         if (snapshot.hasData) {
           if (widget.relativePath.endsWith('svg')) {
-            final rawSvg = String.fromCharCodes(snapshot.data!)
-                .replaceFirst("<svg", '<svg style="fill:gray;"');
+            // final rawSvg = String.fromCharCodes(snapshot.data!)
+            // .replaceFirst("<svg", '<svg style="fill:gray;"');
             return FittedBox(
               fit: BoxFit.scaleDown,
-              child: SvgPicture.string(rawSvg),
+              child: SvgPicture.memory(snapshot.data!),
             );
           } else {
             return Image.memory(snapshot.data!, scale: scale);
