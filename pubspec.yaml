@@ -32,9 +32,10 @@ dependencies:
   google_fonts: ^4.0.1
   http: ^0.13.0
   intl: ^0.18.0
-  # org_flutter: ^3.1.0-pre.1
   org_flutter:
-    path: ../org_flutter
+    git:
+      url: https://github.com/luk3ya0/org_flutter.git
+      ref: master
   path_provider: ^2.0.9
   shared_preferences: ^2.0.0
   url_launcher: ^6.0.0
