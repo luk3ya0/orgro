@@ -31,12 +31,17 @@ dependencies:
   # flutter_charset_detector:
   #   path: ../flutter_charset_detector
   google_fonts: ^4.0.1
-  http: ^0.13.0
+  http: ^1.0.0
   intl: ^0.20.2
   org_flutter:
     git:
       url: https://github.com/luk3ya0/org_flutter.git
       ref: master
+  flutter_tikz_js:
+    git:
+      url: https://github.com/luk3ya0/flutter_tex_js.git
+      ref: master
+      path: flutter_tex_js
   path: ^1.8.0
   path_provider: ^2.0.9
   shared_preferences: ^2.0.0

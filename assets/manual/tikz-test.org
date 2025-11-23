@@ -1,0 +1,85 @@
+* TikZ Diagram Test
+
+This document tests TikZ diagram rendering in Orgro using LaTeX block syntax.
+
+** Simple Circle
+
+A simple circle with radius annotation:
+
+\begin{tikzpicture}
+  \draw (0,0) circle (1in);
+  \draw (0,0) -- (1in,0);
+  \node at (0.5in, 0.2in) {radius};
+\end{tikzpicture}
+
+** Commutative Diagram
+
+A commutative diagram example:
+
+\begin{tikzcd}
+  A \arrow[r, "\phi"] \arrow[d, red]
+    & B \arrow[d, "\psi" red] \\
+  C \arrow[r, red, "\eta" blue]
+    & D
+\end{tikzcd}
+
+** Coordinate System
+
+A simple coordinate system with axes:
+
+\begin{tikzpicture}
+  % Draw axes
+  \draw[->] (-1,0) -- (4,0) node[right] {$x$};
+  \draw[->] (0,-1) -- (0,4) node[above] {$y$};
+  
+  % Draw a function
+  \draw[domain=0:3.5, smooth, variable=\x, blue, thick] 
+    plot ({\x}, {\x*\x/3});
+  
+  % Add labels
+  \node at (3, 3.5) {$y = \frac{x^2}{3}$};
+\end{tikzpicture}
+
+** Geometric Shapes
+
+Various geometric shapes:
+
+\begin{tikzpicture}
+  % Triangle
+  \draw[fill=blue!20] (0,0) -- (2,0) -- (1,1.732) -- cycle;
+  \node at (1, 0.5) {Triangle};
+  
+  % Square
+  \draw[fill=red!20] (3,0) rectangle (5,2);
+  \node at (4, 1) {Square};
+  
+  % Circle
+  \draw[fill=green!20] (7,1) circle (1);
+  \node at (7, 1) {Circle};
+\end{tikzpicture}
+
+** Graph Example
+
+A simple graph with nodes and edges:
+
+\begin{tikzpicture}[node distance=2cm]
+  % Nodes
+  \node[circle, draw] (A) {A};
+  \node[circle, draw, right of=A] (B) {B};
+  \node[circle, draw, below of=A] (C) {C};
+  \node[circle, draw, below of=B] (D) {D};
+  
+  % Edges
+  \draw[->] (A) -- (B);
+  \draw[->] (A) -- (C);
+  \draw[->] (B) -- (D);
+  \draw[->] (C) -- (D);
+  \draw[->] (C) -- (B);
+\end{tikzpicture}
+
+* Notes
+
+- TikZ rendering requires network access to load TikZJax from CDN
+- Rendering may take a few seconds on first load
+- Complex diagrams may take longer to render
+- TikZ blocks use LaTeX syntax: ~\begin{tikzpicture}...\end{tikzpicture}~

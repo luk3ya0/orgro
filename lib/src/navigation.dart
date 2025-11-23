@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:orgro/src/temp_localizations.dart';
 import 'package:org_flutter/org_flutter.dart';
@@ -70,7 +71,7 @@ PageRoute _buildDocumentRoute(
   );
 }
 
-class _DocumentPageWrapper extends StatelessWidget {
+class _DocumentPageWrapper extends StatefulWidget {
   const _DocumentPageWrapper({
     required this.doc,
     required this.dataSource,
@@ -82,22 +83,53 @@ class _DocumentPageWrapper extends StatelessWidget {
   final String? target;
 
   @override
+  State<_DocumentPageWrapper> createState() => _DocumentPageWrapperState();
+}
+
+class _DocumentPageWrapperState extends State<_DocumentPageWrapper> {
+  @override
+  void initState() {
+    super.initState();
+    // Auto-expand all sections in debug mode
+    if (kDebugMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _expandAllSections();
+      });
+    }
+  }
+
+  void _expandAllSections() {
+    try {
+      final controller = OrgController.of(context);
+      debugPrint('🔍 DEBUG: Expanding all sections (widen)...');
+      // Cycle twice to get to "show all" state
+      controller.cycleVisibility(); // folded -> contents
+      Future.delayed(const Duration(milliseconds: 100), () {
+        controller.cycleVisibility(); // contents -> show all
+        debugPrint('🔍 DEBUG: All sections expanded');
+      });
+    } catch (e, stack) {
+      debugPrint('❌ DEBUG: Could not expand sections: $e\n$stack');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final prefs = Preferences.of(context);
     return RootRestorationScope(
-      restorationId: 'org_page_root:${dataSource.id}',
+      restorationId: 'org_page_root:${widget.dataSource.id}',
       child: OrgController(
-        root: doc,
+        root: widget.doc,
         hideMarkup: prefs.readerMode,
-        restorationId: 'org_page:${dataSource.id}',
+        restorationId: 'org_page:${widget.dataSource.id}',
         child: ViewSettings.defaults(
           context,
           child: DocumentPage(
-            doc: doc,
-            title: dataSource.name,
-            dataSource: dataSource,
-            initialTarget: target,
-            child: OrgDocumentWidget(doc, shrinkWrap: true),
+            doc: widget.doc,
+            title: widget.dataSource.name,
+            dataSource: widget.dataSource,
+            initialTarget: widget.target,
+            child: OrgDocumentWidget(widget.doc, shrinkWrap: true),
           ),
         ),
       ),

@@ -328,10 +328,25 @@ class ParsedOrgFileInfo {
   final OrgDocument doc;
 }
 
-Future<OrgDocument> parse(String content) async =>
-    time('parse', () => compute(_parse, content));
+Future<OrgDocument> parse(String content) async {
+  print('🔍 PARSE: Starting parse, content length: ${content.length}');
+  final doc = await time('parse', () => compute(_parse, content));
+  print('🔍 PARSE: Finished parse, document has ${doc.sections.length} sections');
+  return doc;
+}
 
-OrgDocument _parse(String text) => OrgDocument.parse(text);
+OrgDocument _parse(String text) {
+  final doc = OrgDocument.parse(text);
+  // Count LaTeX blocks
+  int latexCount = 0;
+  doc.visit<OrgLatexBlock>((block) {
+    latexCount++;
+    print('🔍 PARSE: Found LaTeX block #$latexCount - environment: "${block.environment}"');
+    return true;
+  });
+  print('🔍 PARSE: Total LaTeX blocks found: $latexCount');
+  return doc;
+}
 
 Future<String> _readFile(File file) async {
   // 优化：只读取文件一次，避免双重读取
