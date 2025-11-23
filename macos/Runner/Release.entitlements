@@ -7,6 +7,10 @@
 	<!-- <key>com.apple.security.app-sandbox</key>
 	<true/> -->
 	
+	<!-- Required for Flutter Dart VM JIT compilation and text selection -->
+	<key>com.apple.security.cs.allow-jit</key>
+	<true/>
+	
 	<key>com.apple.security.network.client</key>
 	<true/>
 	
