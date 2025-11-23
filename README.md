@@ -2,7 +2,7 @@
 
 # Orgro
 
-An [Org Mode](https://orgmode.org/) file viewer for iOS and Android
+An [Org Mode](https://orgmode.org/) file viewer for iOS, Android, and macOS
 
 <img width="300" src="https://orgro.org/assets/screenshot/flutter_02.png">
 
@@ -63,9 +63,20 @@ Play](https://play.google.com/store/apps/details?id=com.madlonkay.orgro), and
 [F-Droid](https://f-droid.org/packages/com.madlonkay.orgro/), or you can build
 and install from source:
 
+## Mobile (iOS/Android)
+
 1. Install [Flutter](https://flutter.dev/)
 2. Clone this repo
 3. Attach your device and do `flutter run` from the repo root
+
+## macOS
+
+1. Install [Flutter](https://flutter.dev/)
+2. Clone this repo
+3. Run the setup script: `./setup_macos.sh`
+4. Run `flutter run -d macos`
+
+See [QUICKSTART_MACOS.md](QUICKSTART_MACOS.md) for detailed instructions.
 
 # Support Orgro
 

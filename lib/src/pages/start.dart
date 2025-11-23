@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:orgro/src/temp_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:orgro/src/actions/appearance.dart';
 import 'package:orgro/src/actions/cache.dart';
@@ -232,8 +232,16 @@ class _ListHeader extends StatelessWidget {
 
 // Do not make format object a constant because it will break dynamic UI
 // language switching
-String _formatLastOpenedDate(DateTime date, String locale) =>
-    DateFormat.yMd(locale).add_jm().format(date);
+String _formatLastOpenedDate(DateTime date, String locale) {
+  try {
+    return DateFormat.yMd(locale).add_jm().format(date);
+  } catch (e) {
+    // 如果格式化失败，使用简单格式
+    debugPrint('Date formatting error: $e');
+    return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')} '
+           '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
+  }
+}
 
 class _RecentFileListTile extends StatelessWidget {
   const _RecentFileListTile(this.recentFile);
@@ -255,10 +263,7 @@ class _RecentFileListTile extends StatelessWidget {
           _formatLastOpenedDate(
               recentFile.lastOpened, AppLocalizations.of(context)!.localeName),
         ),
-        onTap: () async => _loadAndRememberFile(
-          context,
-          readFileWithIdentifier(recentFile.identifier),
-        ),
+        onTap: () async => _openRecentFile(context, recentFile),
       ),
     );
   }
@@ -287,13 +292,15 @@ Future<RecentFile?> _loadFile(
   BuildContext context,
   FutureOr<NativeDataSource?> dataSource,
 ) async {
-  final restorationScope = RestorationScope.of(context);
+  final restorationScope = RestorationScope.maybeOf(context);
   final loaded = await loadDocument(
     context,
     dataSource,
     onClose: () {
-      debugPrint('Clearing saved state');
-      restorationScope.remove<String>(_kRestoreOpenFileIdKey);
+      if (restorationScope != null) {
+        debugPrint('Clearing saved state');
+        restorationScope.remove<String>(_kRestoreOpenFileIdKey);
+      }
     },
   );
   RecentFile? result;
@@ -321,16 +328,43 @@ Future<void> _loadAndRememberFile(
   FutureOr<NativeDataSource?> fileInfoFuture,
 ) async {
   final recentFiles = RecentFiles.of(context);
-  final restorationScope = RestorationScope.of(context);
+  final restorationScope = RestorationScope.maybeOf(context);
   final recentFile = await _loadFile(context, fileInfoFuture);
   if (recentFile != null) {
     recentFiles.add(recentFile);
-    debugPrint('Saving file ID to state');
-    restorationScope.write<String>(
-      _kRestoreOpenFileIdKey,
-      recentFile.identifier,
-    );
+    if (restorationScope != null) {
+      debugPrint('Saving file ID to state');
+      restorationScope.write<String>(
+        _kRestoreOpenFileIdKey,
+        recentFile.identifier,
+      );
+    }
   }
+}
+
+Future<void> _openRecentFile(BuildContext context, RecentFile recentFile) async {
+  // 先检查文件是否存在
+  final dataSource = await readFileWithIdentifier(recentFile.identifier);
+  
+  if (dataSource == null) {
+    // 文件不存在或无法访问
+    if (!context.mounted) return;
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('File not found: ${recentFile.name}'),
+        action: SnackBarAction(
+          label: 'Remove',
+          onPressed: () => RecentFiles.of(context).remove(recentFile),
+        ),
+        duration: const Duration(seconds: 5),
+      ),
+    );
+    return;
+  }
+  
+  // 文件存在，打开它
+  await _loadAndRememberFile(context, Future.value(dataSource));
 }
 
 class _PickFileButton extends StatelessWidget {

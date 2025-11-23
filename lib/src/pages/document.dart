@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:orgro/src/temp_localizations.dart';
 import 'package:org_flutter/org_flutter.dart';
 import 'package:orgro/src/actions/actions.dart';
 import 'package:orgro/src/actions/geometry.dart';
@@ -73,7 +73,8 @@ class _DocumentPageState extends State<DocumentPage> with ViewSettingsState {
   void didChangeDependencies() {
     super.didChangeDependencies();
     initViewSettings();
-    time('analyze', _analyzeDoc);
+    // 异步执行，不阻塞 UI 渲染
+    Future.microtask(() => time('analyze', _analyzeDoc));
   }
 
   void _openInitialTarget() {

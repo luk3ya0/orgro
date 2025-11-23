@@ -194,6 +194,11 @@ const _kMonospaceGoogleFontFamilies = <String>{
 };
 
 TextStyle loadFontWithVariants(String family) {
+  // For Fira Code, use the local bundled font
+  if (family == 'Fira Code') {
+    return const TextStyle(fontFamily: 'Fira Code');
+  }
+  
   try {
     return _loadDynamicFont(family);
   } on Exception catch (e) {
@@ -202,24 +207,32 @@ TextStyle loadFontWithVariants(String family) {
   }
   try {
     return _loadGoogleFont(family);
-  } on Exception {
-    return _loadGoogleFont(kDefaultFontFamily);
+  } on Exception catch (e) {
+    debugPrint('Failed to load Google Font $family: $e');
+    // Fallback to system monospace font
+    return const TextStyle(fontFamily: 'monospace');
   }
 }
 
 TextStyle _loadGoogleFont(String fontFamily) {
-  // Load actual bold and italic to avoid synthetics
-  //
-  // You might think this would work (it *does* download all of these variants)
-  // but actually each variant is registered as a separate font, so we *still*
-  // get synthetic bold and italic. See
-  // https://github.com/material-foundation/google-fonts-flutter/issues/35#issuecomment-959043020
-  //
-  // GoogleFonts.getFont(fontFamily, fontWeight: FontWeight.bold);
-  // GoogleFonts.getFont(fontFamily, fontStyle: FontStyle.italic);
-  // GoogleFonts.getFont(fontFamily,
-  //     fontWeight: FontWeight.bold, fontStyle: FontStyle.italic);
-  return GoogleFonts.getFont(fontFamily);
+  try {
+    // Load actual bold and italic to avoid synthetics
+    //
+    // You might think this would work (it *does* download all of these variants)
+    // but actually each variant is registered as a separate font, so we *still*
+    // get synthetic bold and italic. See
+    // https://github.com/material-foundation/google-fonts-flutter/issues/35#issuecomment-959043020
+    //
+    // GoogleFonts.getFont(fontFamily, fontWeight: FontWeight.bold);
+    // GoogleFonts.getFont(fontFamily, fontStyle: FontStyle.italic);
+    // GoogleFonts.getFont(fontFamily,
+    //     fontWeight: FontWeight.bold, fontStyle: FontStyle.italic);
+    return GoogleFonts.getFont(fontFamily);
+  } on Exception catch (e) {
+    debugPrint('Error loading Google Font $fontFamily: $e');
+    // Return a fallback style instead of crashing
+    return const TextStyle(fontFamily: 'monospace');
+  }
 }
 
 TextStyle _loadDynamicFont(String fontFamily) {

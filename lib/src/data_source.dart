@@ -1,11 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker_writable/file_picker_writable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_charset_detector/flutter_charset_detector.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:orgro/src/temp_localizations.dart';
 import 'package:http/http.dart' as http;
 import 'package:org_flutter/org_flutter.dart';
 import 'package:orgro/src/debug.dart';
@@ -116,18 +117,86 @@ class NativeDataSource extends DataSource {
   String get id => uri;
 
   @override
-  FutureOr<String> get content => FilePickerWritable()
-      .readFile(identifier: identifier, reader: (_, file) => _readFile(file));
+  FutureOr<String> get content async {
+    // On macOS, identifier is a file path, not a persistent identifier
+    if (!kIsWeb && Platform.isMacOS) {
+      final file = File(identifier);
+      return _readFile(file);
+    } else {
+      return FilePickerWritable()
+          .readFile(identifier: identifier, reader: (_, file) => _readFile(file));
+    }
+  }
 
   @override
-  FutureOr<Uint8List> get bytes => FilePickerWritable().readFile(
-      identifier: identifier, reader: (_, file) => file.readAsBytes());
+  FutureOr<Uint8List> get bytes async {
+    if (!kIsWeb && Platform.isMacOS) {
+      final file = File(identifier);
+      return file.readAsBytes();
+    } else {
+      return FilePickerWritable().readFile(
+          identifier: identifier, reader: (_, file) => file.readAsBytes());
+    }
+  }
 
   @override
   FutureOr<NativeDataSource> resolveRelative(String relativePath) async {
+    // On macOS, use file path resolution with directory permissions check
+    if (!kIsWeb && Platform.isMacOS) {
+      // Check if we have directory permission
+      if (_parentDirIdentifier == null) {
+        throw OrgroError(
+          "Can't resolve path relative to this document. Please grant directory access.",
+          localizedMessage: (context) =>
+              AppLocalizations.of(context)!.errorCannotResolveRelativePath,
+        );
+      }
+      
+      final currentFile = File(identifier);
+      final parentDir = currentFile.parent;
+      final resolvedFile = File('${parentDir.path}/$relativePath');
+      
+      // Normalize the path to resolve .. and .
+      final normalizedPath = resolvedFile.absolute.path;
+      final normalizedFile = File(normalizedPath);
+      
+      debugPrint('macOS: Resolving $relativePath from ${parentDir.path}');
+      debugPrint('macOS: Resolved to $normalizedPath');
+      debugPrint('macOS: Parent dir identifier: $_parentDirIdentifier');
+      
+      // Check if the resolved file is within the authorized directory
+      if (!normalizedPath.startsWith('$_parentDirIdentifier/') && 
+          normalizedPath != _parentDirIdentifier) {
+        debugPrint('macOS: File is outside authorized directory');
+        debugPrint('macOS: Normalized path: $normalizedPath');
+        debugPrint('macOS: Authorized dir: $_parentDirIdentifier');
+        throw OrgroError(
+          'File is outside authorized directory: $relativePath',
+          localizedMessage: (context) =>
+              AppLocalizations.of(context)!.errorCannotResolveRelativePath,
+        );
+      }
+      
+      if (!await normalizedFile.exists()) {
+        throw OrgroError(
+          'File not found: $relativePath',
+          localizedMessage: (context) =>
+              AppLocalizations.of(context)!.errorCannotResolveRelativePath,
+        );
+      }
+      
+      return NativeDataSource(
+        normalizedFile.uri.pathSegments.last,
+        normalizedPath,
+        normalizedFile.uri.toString(),
+        persistable: true,
+      );
+    }
+    
+    // Mobile platform implementation
     if (_parentDirIdentifier == null) {
       throw OrgroError(
-        'Can’t resolve path relative to this document',
+        "Can't resolve path relative to this document",
         localizedMessage: (context) =>
             AppLocalizations.of(context)!.errorCannotResolveRelativePath,
       );
@@ -150,10 +219,21 @@ class NativeDataSource extends DataSource {
   }
 
   @override
-  bool get needsToResolveParent => persistable && _parentDirIdentifier == null;
+  bool get needsToResolveParent {
+    // On macOS, we need directory permissions to access relative files
+    if (!kIsWeb && Platform.isMacOS) {
+      return persistable && _parentDirIdentifier == null;
+    }
+    return persistable && _parentDirIdentifier == null;
+  }
 
-  Future<void> resolveParent(List<String> accessibleDirs) async =>
+  Future<void> resolveParent(List<String> accessibleDirs) async {
+    if (!kIsWeb && Platform.isMacOS) {
+      _parentDirIdentifier ??= await _findParentDirIdentifierMacOS(accessibleDirs);
+    } else {
       _parentDirIdentifier ??= await _findParentDirIdentifier(accessibleDirs);
+    }
+  }
 
   Future<String?> _findParentDirIdentifier(
     List<String> accessibleDirs,
@@ -170,6 +250,26 @@ class NativeDataSource extends DataSource {
         // Next
       }
     }
+    return null;
+  }
+
+  Future<String?> _findParentDirIdentifierMacOS(
+    List<String> accessibleDirs,
+  ) async {
+    debugPrint('macOS: Accessible dirs: $accessibleDirs');
+    final currentFile = File(identifier);
+    final parentPath = currentFile.parent.path;
+    
+    // Check if the parent directory is in the accessible dirs
+    for (final dirPath in accessibleDirs) {
+      debugPrint('macOS: Checking if $parentPath starts with $dirPath');
+      if (parentPath == dirPath || parentPath.startsWith('$dirPath/')) {
+        debugPrint('macOS: Found parent dir: $dirPath');
+        return dirPath;
+      }
+    }
+    
+    debugPrint('macOS: Parent directory not in accessible dirs');
     return null;
   }
 }
@@ -234,10 +334,15 @@ Future<OrgDocument> parse(String content) async =>
 OrgDocument _parse(String text) => OrgDocument.parse(text);
 
 Future<String> _readFile(File file) async {
+  // 优化：只读取文件一次，避免双重读取
+  final bytes = await file.readAsBytes();
+  
+  // 快速检测：尝试 UTF-8 解码（最常见的情况）
   try {
-    return await file.readAsString();
-  } on Exception {
-    final bytes = await file.readAsBytes();
+    return utf8.decode(bytes, allowMalformed: false);
+  } on FormatException {
+    // UTF-8 失败，使用完整的编码检测
+    debugPrint('UTF-8 decode failed, using charset detector');
     final decoded = await CharsetDetector.autoDecode(bytes);
     debugPrint('Decoded file as ${decoded.charset}');
     return decoded.string;

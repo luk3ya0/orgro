@@ -1,8 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:orgro/src/temp_localizations.dart';
 import 'package:org_flutter/org_flutter.dart';
+import 'package:orgro/src/cache.dart';
 import 'package:orgro/src/data_source.dart';
 import 'package:orgro/src/pages/pages.dart';
 import 'package:orgro/src/preferences.dart';
@@ -23,7 +24,8 @@ Future<bool> loadDocument(
   // the result won't be recomputed e.g. on hot reload
   final parsed = Future.value(dataSource).then((source) {
     if (source != null) {
-      return ParsedOrgFileInfo.from(source);
+      // 使用缓存来提升性能
+      return DocumentCache.getOrParse(source);
     } else {
       // There was no fileーthe user canceled so close the route. We wait until
       // here to know if the user canceled because when the user doesn't cancel
